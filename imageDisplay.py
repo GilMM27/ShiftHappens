@@ -8,7 +8,7 @@ class ImageDisplay:
 
     def show_image(self):
         image = pygame.image.load(self.images[self.current_image_index])
-        self.screen.blit(image, (1280/2 - 263/2, 720/2 - 274/2))
+        self.screen.blit(image, (950, 400))
         pygame.display.flip()
 
     def change_image(self, index):
