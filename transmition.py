@@ -1,5 +1,6 @@
 import pygame
 import os
+import sys
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 pygame.display.set_caption('CODICON')
@@ -25,9 +26,27 @@ class ImageDisplay:
 
 # Create an instance of the ImageDisplay class
 image_display = ImageDisplay(screen)
+image_display.show_image()
+
+# Car properties
+car_velocity = 0  # Initial velocity in km/h
+rpm = 0  # Initial RPM
+rpm_to_velocity_factor = 0.000005  # Conversion factor from RPM to velocity
+gear_ratios = [5, 3.5, 2, 1.5, 1.0, 0.7]  # Gear ratios for gears 1 to 5
+current_gear = 1  # Initial gear
+
+# Clock for controlling the frame rate
+clock = pygame.time.Clock()
 
 run = True
 while run:
+    if image_display.current_image_index < 6:
+        current_gear = image_display.current_image_index
+        if rpm < 7000: rpm += 30
+        car_velocity += rpm * rpm_to_velocity_factor * gear_ratios[current_gear - 1]
+    else:
+        rpm = 0
+    print('Gear:', current_gear, 'RPM:', rpm, 'Velocity:', car_velocity)
     
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
@@ -66,7 +85,7 @@ while run:
                 
         if event.type == pygame.QUIT:
             run = False
-
+    clock.tick(60)
    
     
     #pygame.display.update()
