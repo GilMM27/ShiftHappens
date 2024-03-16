@@ -68,8 +68,24 @@ def game_loop():
     
     breaking = False
     run = True
+
+    carSizeX = 50
+    carSizeY = 100
+    # pygame.draw.rect(screen, [255,255,255], [1280/2-carSizeX/2, 720/2-carSizeY/2, carSizeX, carSizeY], 4)
+    car = pygame.image.load("assets/carStolenAsset.png").convert_alpha()
+    car = pygame.transform.scale(car, (carSizeX, carSizeY))
     
     while run:
+        screen.fill("#000000")
+
+        pos = pygame.mouse.get_pos()
+        x_dist = pos[0] - 1280/2
+        y_dist = -(pos[1] - 720/2)
+        angle = math.degrees(math.atan2(y_dist, x_dist))
+        carRotated = pygame.transform.rotate(car, angle - 90)
+        car_rect = carRotated.get_rect(center=(1280/2, 720/2))
+        screen.blit(carRotated, car_rect)
+
         if image_display.current_image_index < 6:
             current_gear = image_display.current_image_index
             if car_velocity < MIN_SPEEDS[current_gear] or car_velocity > MAX_SPEEDS[current_gear]: print('No se puede cambiar a esta marcha')
@@ -126,8 +142,9 @@ def game_loop():
                 run = False
         clock.tick(60)
     
-        
-        #pygame.display.update()
+        # image_display.show_image(image_display.current_image_index, pygame.math.Vector2(950, 400))
+        image_display.show_image()
+        #pygame.display.update()f
         pygame.display.flip()
     pygame.quit()
 main_menu()
