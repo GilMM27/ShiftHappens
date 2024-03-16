@@ -26,10 +26,6 @@ class ImageDisplay:
 # Create an instance of the ImageDisplay class
 image_display = ImageDisplay(screen)
 
-# Call the change_image method to display a specific image
-image_display.change_image(0)
-delay = 1000
-
 run = True
 while run:
     
