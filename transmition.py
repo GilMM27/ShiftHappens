@@ -112,26 +112,59 @@ def game_loop():
 
         for event in pygame.event.get(): # Evento pa las keys
             if event.type == pygame.KEYDOWN: # Cuando se preciona una tecla
-                if event.key == pygame.K_DOWN:
+                if image_display.current_image_index == 2 and event.key == pygame.K_DOWN and pygame.key.get_pressed()[pygame.K_RIGHT]:
+                    image_display.change_image(7)
+                    delay = 100
+                    pygame.time.delay(delay)
+                    if image_display.current_image_index == 7:
+                        image_display.change_image(8)
+                    
+                elif image_display.current_image_index == 3 and event.key == pygame.K_UP and pygame.key.get_pressed()[pygame.K_RIGHT]:
+                    image_display.change_image(7)
+                    delay = 100
+                    pygame.time.delay(delay)
+                    if image_display.current_image_index == 7:
+                        image_display.change_image(8)
+                        
+                elif image_display.current_image_index == 2 and event.key == pygame.K_DOWN and pygame.key.get_pressed()[pygame.K_LEFT]:
+                    image_display.change_image(7)
+                    delay = 100
+                    pygame.time.delay(delay)
+                    if image_display.current_image_index == 7:
+                        image_display.change_image(6)
+                
+                elif image_display.current_image_index == 3 and event.key == pygame.K_UP and pygame.key.get_pressed()[pygame.K_LEFT]:
+                    image_display.change_image(7)
+                    delay = 100
+                    pygame.time.delay(delay)
+                    if image_display.current_image_index == 7:
+                        image_display.change_image(6)
+                elif event.key == pygame.K_DOWN:
                     index_map = {0: 6, 2: 7, 4: 8, 6: 1, 7: 3, 8: 5}
                     if image_display.current_image_index in index_map:
                         image_display.change_image(index_map[image_display.current_image_index])
                 elif event.key == pygame.K_RIGHT:
                     if 6 <= image_display.current_image_index < 8:
                         image_display.change_image(image_display.current_image_index + 1)
+                elif image_display.current_image_index in [0,1]:
+                    image_display.change_image(6)
+
                 elif event.key == pygame.K_LEFT:
                     if 6 < image_display.current_image_index <= 8:
                         image_display.change_image(image_display.current_image_index - 1)
+                elif image_display.current_image_index in [4,5]:
+                    image_display.change_image(8)
                 elif event.key == pygame.K_UP:
                     index_map = {1: 6, 3: 7, 5: 8, 6: 0, 7: 2, 8: 4}
                     if image_display.current_image_index in index_map:
                         image_display.change_image(index_map[image_display.current_image_index])
+                
                 elif event.key == pygame.K_SPACE:
                     breaking = True
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                    if 6 <= image_display.current_image_index <= 8 and not pygame.key.get_pressed()[pygame.K_LEFT] and not pygame.key.get_pressed()[pygame.K_RIGHT]:
+                    if 6 <= image_display.current_image_index <= 8 and not pygame.key.get_pressed()[pygame.K_LEFT] and not pygame.key.get_pressed()[pygame.K_RIGHT] and not pygame.key.get_pressed()[pygame.K_UP] and not pygame.key.get_pressed()[pygame.K_DOWN]:
                         image_display.change_image(7)
                 if event.key == pygame.K_ESCAPE: # Pa cerrar el juego cuando suelte el Escape
                     run = False
