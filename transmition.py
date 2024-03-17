@@ -202,7 +202,7 @@ def game_loop():
     mov_x = 0
     mov_y = 0
     # vel_list = []
-    derrape = False
+    # derrape = False
 
     point_time=0
     
@@ -233,23 +233,19 @@ def game_loop():
         for point in road_points:
             pygame.draw.circle(screen, (0, 0, 0), (point), 50)  # Draw a black circle at each point
 
-        if not derrape:
-            near_origin = punto_mas_cercano(road_points, screen_width, screen_height)
-            theta = math.atan( (road_points[near_origin+10][1] - road_points[near_origin][1])/ (road_points[near_origin+10][0] - road_points[near_origin][0]) )
-            vx = speed*math.cos(theta)
-            vy = speed*math.sin(theta)
-            mov_x = -vx
-            mov_y = -vy
-        else:
-            theta = -0.78
+        # if not derrape:
+        near_origin = punto_mas_cercano(road_points, screen_width, screen_height)
+        theta = math.atan( (road_points[near_origin+10][1] - road_points[near_origin][1])/ (road_points[near_origin+10][0] - road_points[near_origin][0]) )
+        vx = speed*math.cos(theta)
+        vy = speed*math.sin(theta)
+        mov_x = -vx
+        mov_y = -vy
+        # else:
+        #     theta = -0.78
 
-        if speed > vel_list[near_origin]:
-            print("sobrepaso el limite de velocidad en ", road_points[near_origin])
-            derrape = True
-
-        if speed > vel_list[near_origin]:
-            print("sobrepaso el limite de velocidad en ", road_points[near_origin])
-            derrape = True
+        # if speed > vel_list[near_origin]:
+        #     print("sobrepaso el limite de velocidad en ", road_points[near_origin])
+        #     derrape = True
 
         # Car stuff
         angle = abs(math.degrees(theta))
@@ -373,7 +369,7 @@ def game_loop():
 
         velocity.update_Motion(car_velocity)
         revolution.update_Motion(rpm)
-        drawSpeedlimit(vel_list[near_origin])
+        # drawSpeedlimit(vel_list[near_origin])
         clock.tick(60)
         # image_display.show_image(image_display.current_image_index, pygame.math.Vector2(950, 400))
         image_display.show_image()
