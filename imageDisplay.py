@@ -15,3 +15,7 @@ class ImageDisplay:
         if index >= 0 and index < len(self.images):
             self.current_image_index = index
             self.show_image()
+    
+    def blit_image(self, image, pos):
+        self.screen.blit(image, pos)
+        pygame.display.flip()
