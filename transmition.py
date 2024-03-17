@@ -69,10 +69,10 @@ def game_loop():
     breaking = False
     run = True
 
-    carSizeX = 50
-    carSizeY = 100
+    carSizeX = 75
+    carSizeY = 150
     # pygame.draw.rect(screen, [255,255,255], [1280/2-carSizeX/2, 720/2-carSizeY/2, carSizeX, carSizeY], 4)
-    car = pygame.image.load("assets/carStolenAsset.png").convert_alpha()
+    car = pygame.image.load("assets/carrito.png").convert_alpha()
     car = pygame.transform.scale(car, (carSizeX, carSizeY))
     
     while run:
