@@ -77,7 +77,7 @@ def game_loop():
     
     while run:
         screen.fill("#000000")
-
+        pygame.draw.circle(screen, [255,255,255], [0,100], 10, 4)
         pos = pygame.mouse.get_pos()
         x_dist = pos[0] - 1280/2
         y_dist = -(pos[1] - 720/2)
