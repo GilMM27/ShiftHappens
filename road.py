@@ -9,27 +9,36 @@ screen_width, screen_height = 1280, 720
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('CODICON')
 
-background_load = pygame.image.load('background.jpeg') #cambiar de imagen a una que no se pixelee
+background_load = pygame.image.load('../../../../Desktop/background.jpeg')
 background = pygame.transform.scale(background_load, (screen_width, screen_height))
 
 ''''''
 def random_coeff():
-    return [random.randrange(-5,0), random.randrange(-5,5), random.randrange(-5,5), 0 ]
+    return [random.uniform(-1,0), random.uniform(-5,5), random.uniform(-5,5), 0 ]
 
 def roadFun(pos_x, coeff):
     return coeff[0] * (pos_x ** 3) + coeff[1] * (pos_x ** 2) + coeff[2] * pos_x + coeff[3]
 
-def der_roadFun(pos_x): #esto solo se usaria si se quiere calcular la vel max para el derrape
+def der_roadFun(pos_x, coeff): #esto solo se usaria si se quiere calcular la vel max para el derrape
     return 3 * coeff[0] * pos_x ** 2 + 2 * coeff[1] * pos_x + coeff[2]
 
-def der2_roadFun(pos_x): #esto solo se usaria si se quiere calcular la vel max para el derrape
+def der2_roadFun(pos_x, coeff): #esto solo se usaria si se quiere calcular la vel max para el derrape
     return 6 * coeff[0] * pos_x + 2 * coeff[1]
+
+def vel_max(x_pos, coeffs):
+    R = (1+ der_roadFun(x_pos, coeffs)**2)**(3/2) / abs(der2_roadFun(x_pos, coeffs))
+    coeffFriction = 0.8
+    vmax = math.sqrt( R * 9.81 * coeffFriction ) * 3.6 #m/s a km/h
+    return vmax
 
 def calculate_roadpoints(_coeff):
     points = []
     i = 0
     for x in range(-1000, 1000, 2): # TODO cortar esto para que no haya tanta linea aburrida
         points.append((i, roadFun(x / 100, _coeff) + (screen_height / 2)))
+
+        vel_list.append(vel_max(x,_coeff))
+
         i += 1
     return points
 
@@ -63,16 +72,15 @@ def punto_mas_cercano(road_points, screen_width, screen_height):
 
 ''''''
 #def __init__:
+vel_list = []
 road_points = calculate_roadpoints(random_coeff())
 new_road_points = calculate_roadpoints(random_coeff())
+derrape = False
 
-speed = 10 #speed de la transmision
-
+speed = 100 #speed de la transmision
 
 mov_x = 0
 mov_y = 0
-
-
 ''''''
 
 run = True
@@ -90,6 +98,7 @@ while run:
         road_points[i] = (x + mov_x, y + mov_y)
         if road_points[i][1] > 1500:
             road_points.pop(i)
+            vel_list.pop(i)
         else:
             i += 1
 
@@ -102,36 +111,23 @@ while run:
     for point in road_points:
         pygame.draw.circle(screen, (0, 0, 0), (point), 50)  # Draw a black circle at each point
 
-    near_origin = punto_mas_cercano(road_points, screen_width, screen_height)
-    theta = math.atan( (road_points[near_origin+10][1] - road_points[near_origin][1])/ (road_points[near_origin+10][0] - road_points[near_origin][0]) )
-    vx = speed*math.cos(theta)
-    vy = speed*math.sin(theta)
-    mov_x = -vx
-    mov_y = -vy
+    if not derrape:
+        near_origin = punto_mas_cercano(road_points, screen_width, screen_height)
+        theta = math.atan( (road_points[near_origin+10][1] - road_points[near_origin][1])/ (road_points[near_origin+10][0] - road_points[near_origin][0]) )
+        vx = speed*math.cos(theta)
+        vy = speed*math.sin(theta)
+        mov_x = -vx
+        mov_y = -vy
+    else:
+        theta = -0.78
 
+    if speed > vel_list[near_origin]:
+        print("sobrepaso el limite de velocidad en ", road_points[near_origin])
+        derrape = True
 
 
     pygame.display.flip()
     clock = pygame.time.Clock()
 
-    #pygame.time.wait(500 // 60)
+    pygame.time.wait(1000 // 60)
 pygame.quit()
-
-
-
-
-
-'''
-
- % Curvaturas
-    R(i)= (1+fp(x(i))^2)^(3/2)/abs(fpp(x(i)));
-
-    % Velocidades máximas durante la curva
-    if (x(i) > 63 && x(i) < 98) || (x(i) > 175 && x(i) < 214)
-        vmax(i) = sqrt( R(i) * 9.81 * ( (sin(peralte) + coeffFriccion*cos(peralte)) / (cos(peralte) - coeffFriccion*sin(peralte)) ) );
-    else
-        constante = ( (sin(0) + coeffFriccion*cos(0)) / (cos(0) - coeffFriccion*sin(0)) );
-        vmax(i) = sqrt( R(i) * 9.81 * constante );
-    end
-
-'''
