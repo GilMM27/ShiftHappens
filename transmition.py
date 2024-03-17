@@ -7,7 +7,7 @@ from imageDisplay import ImageDisplay
 from button import Button
 import motionmeter
 #import road
-
+ 
 pygame.init()
 screen_width, screen_height = 1280, 720
 screen = pygame.display.set_mode((screen_width, screen_height))
@@ -56,22 +56,31 @@ def main_menu():
 
 # cosas dana.
 def random_coeff():
-    return [random.randrange(-5,0), random.randrange(-5,5), random.randrange(-5,5), 15 ]
+    return [random.uniform(-1,0), random.uniform(-5,5), random.uniform(-5,5), 0 ]
 
 def roadFun(pos_x, coeff):
     return coeff[0] * (pos_x ** 3) + coeff[1] * (pos_x ** 2) + coeff[2] * pos_x + coeff[3]
 
-def der_roadFun(pos_x): #esto solo se usaria si se quiere calcular la vel max para el derrape
+def der_roadFun(pos_x, coeff): #esto solo se usaria si se quiere calcular la vel max para el derrape
     return 3 * coeff[0] * pos_x ** 2 + 2 * coeff[1] * pos_x + coeff[2]
 
-def der2_roadFun(pos_x): #esto solo se usaria si se quiere calcular la vel max para el derrape
+def der2_roadFun(pos_x, coeff): #esto solo se usaria si se quiere calcular la vel max para el derrape
     return 6 * coeff[0] * pos_x + 2 * coeff[1]
+    
+def vel_max(x_pos, coeffs):
+    R = (1+ der_roadFun(x_pos, coeffs)**2)**(3/2) / abs(der2_roadFun(x_pos, coeffs))
+    coeffFriction = 0.8
+    vmax = math.sqrt( R * 9.81 * coeffFriction ) * 3.6 #m/s a km/h
+    return vmax
+
+vel_list = []
 
 def calculate_roadpoints(_coeff):
     points = []
     i = 0
     for x in range(-1000, 1000, 2): # TODO cortar esto para que no haya tanta linea aburrida
         points.append((i, roadFun(x / 100, _coeff) + (screen_height / 2)))
+        vel_list.append(vel_max(x,_coeff))
         i += 1
     return points
 
@@ -102,14 +111,17 @@ def punto_mas_cercano(road_points, screen_width, screen_height):
 
     return posicion_minima
 
+
 def drawSpeedlimit(speed):
     image = pygame.image.load("assets/speedlimit.png")
     imageX = 250
     imageY = 250
     image = pygame.transform.scale(image, (imageX, imageY))
     screen.blit(image, (screen_width-300, 50))
-    speedText = get_font(40).render(str(speed), True, (0, 0, 0))
-    screen.blit(speedText, (screen_width-250, 100))
+    speedText = get_font(70).render(str(speed), True, (0, 0, 0))
+    screen.blit(speedText, (screen_width-215, 125))
+    maxText = get_font(15).render("Limite de velocidad", True, (0, 0, 0))
+    screen.blit(maxText, (screen_width-255, 190))
 
 def game_loop():
     # Create an instance of the ImageDisplay class
@@ -144,6 +156,8 @@ def game_loop():
     speed = 30 #speed de la transmision
     mov_x = 0
     mov_y = 0
+    # vel_list = []
+    derrape = False
     
     while run:
         screen.fill("#000000")
@@ -172,12 +186,23 @@ def game_loop():
         for point in road_points:
             pygame.draw.circle(screen, (0, 0, 0), (point), 50)  # Draw a black circle at each point
 
-        near_origin = punto_mas_cercano(road_points, screen_width, screen_height)
-        theta = math.atan( (road_points[near_origin+10][1] - road_points[near_origin][1])/ (road_points[near_origin+10][0] - road_points[near_origin][0]) )
-        vx = speed*math.cos(theta)
-        vy = speed*math.sin(theta)
-        mov_x = -vx
-        mov_y = -vy
+        if not derrape:
+            near_origin = punto_mas_cercano(road_points, screen_width, screen_height)
+            theta = math.atan( (road_points[near_origin+10][1] - road_points[near_origin][1])/ (road_points[near_origin+10][0] - road_points[near_origin][0]) )
+            vx = speed*math.cos(theta)
+            vy = speed*math.sin(theta)
+            mov_x = -vx
+            mov_y = -vy
+        else:
+            theta = -0.78
+
+        if speed > vel_list[near_origin]:
+            print("sobrepaso el limite de velocidad en ", road_points[near_origin])
+            derrape = True
+
+        if speed > vel_list[near_origin]:
+            print("sobrepaso el limite de velocidad en ", road_points[near_origin])
+            derrape = True
 
         # Car stuff
         angle = abs(math.degrees(theta))
@@ -283,7 +308,7 @@ def game_loop():
                 run = False
         velocity.update_Motion(car_velocity)
         revolution.update_Motion(rpm)
-        drawSpeedlimit(speed)
+        drawSpeedlimit(vel_list[near_origin])
         clock.tick(60)
         # image_display.show_image(image_display.current_image_index, pygame.math.Vector2(950, 400))
         image_display.show_image()
