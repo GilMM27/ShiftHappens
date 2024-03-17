@@ -5,6 +5,7 @@ import math
 from imageDisplay import ImageDisplay
 import numpy as np
 from button import Button
+import random
 
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
@@ -50,9 +51,9 @@ def main_menu():
 x = []
 y = []
 
-A = 1.3
-B = 0
-C = -1.2
+A = 1.2
+B = -1.4
+C = -1.6
 
 def function(x):
     fx = A*math.pow(x,3) + B*math.pow(x,2) + C*x
@@ -80,24 +81,52 @@ def initial_points(x,y,x_size,y_size,trans_size,start):
 x =[]
 y= []
 def draw_pista(point):
-    trans_size = 2000
+    trans_size = 1000
     if x == []:
         try:
-            end = -B + math.sqrt(B**2 - 4*A*C) / (2*A)
-            start = -B - math.sqrt(B**2 - 4*A*C) / (2*A)
+            A= random.uniform(-3.0,-0.7)
+            B= random.uniform(-2,1.4)
+            C= random.uniform(0.9,2.0)
+            # A = -1.89
+            # B= -0.64
+            # C= 1.88
+            print(f"A: {A}, B: {B}, C: {C}")
+            end = (-B + math.sqrt(math.pow(B,2)-4*A*C))/(2*A)
+            start = (-B - math.sqrt(math.pow(B,2)-4*A*C))/(2*A)
         except: 
             print("Error")
-        generate_table(start, end, (end-start)/trans_size)
+        generate_table(end, start, (start-end)/trans_size)
+        print(len(x),len(y))
+        global scale
+        scale = random.randint(2000,5000)
     
-    
-    
-    x_i,y_i =initial_points(np.dot(x,5000),np.dot(y,5000),1280,720,int(trans_size*.1),point)
-
-    for i in range(0,len(x_i)-1):
+    x_i,y_i =initial_points(np.dot(x,scale),np.dot(y,scale),1280,720,int(trans_size*.1),point)
+    for i in range(2,len(x_i)-20):
         if x_i[i] > 0 and x_i[i] <1280:
-            pygame.draw.line(screen, [255,255,255], [x_i[i],y_i[i]],[x_i[i+1],y_i[i+1]])
+            #pygame.draw.line(screen, [255,255,255], [x_i[i],y_i[i]],[x_i[i+1],y_i[i+1]],500)
+            pygame.draw.circle(screen, [40,40,40], [x_i[i],y_i[i]], 200)
+            
+    for i in range(2,len(x_i)-20):
+        if x_i[i] > 0 and x_i[i] <1280:
+            #pygame.draw.line(screen, [255,255,255], [x_i[i],y_i[i]],[x_i[i+1],y_i[i+1]],500)
+            pygame.draw.circle(screen, [255,255,255], [x_i[i],y_i[i]], 5)
+            
+            # pygame.draw.line(screen, [255,255,255], prueba_lado(x_i[i-2],y_i[i-2],x_i[i-1],y_i[i-1],200,True),prueba_lado(x_i[i-1],y_i[i-1],x_i[i],y_i[i],200,True))
+            # pygame.draw.line(screen, [255,255,255], prueba_lado(x_i[i-2],y_i[i-2],x_i[i-1],y_i[i-1],200,False),prueba_lado(x_i[i-1],y_i[i-1],x_i[i],y_i[i],200,False))
+                    
+def prueba_lado(x1,y1,x2,y2,sep,side):
+    m  = math.pow((x2-x1),2)+ math.pow((y2-y1),2)
+    angle = math.atan2(sep,(math.sqrt(m)))
+    d= math.sqrt(m+(math.pow(sep,2)))
+    if side:
+        xf = x1 + d*math.cos(angle)
+        yf = y1 + d*math.sin(angle)
+    else:
+        xf = x1 + d*math.cos(-angle)
+        yf = y1 + d*math.sin(-angle)
+    return (xf,yf)
 
-        
+
 
         
 
@@ -135,9 +164,10 @@ def game_loop():
 
         screen.fill("#000000")
         
-        draw_pista(10)
-        cagada+=10
-        
+        draw_pista(cagada)
+        pygame.draw.circle(screen, [255,255,255], [1280//2, 720//2], 10)
+        cagada+=1
+        print(cagada)
         clock.tick(60)
     
         # image_display.show_image(image_display.current_image_index, pygame.math.Vector2(950, 400))

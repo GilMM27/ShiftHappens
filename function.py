@@ -48,10 +48,6 @@ def initial_points(x,y,x_size,y_size,trans_size,start):
     #     else:
     #         y_f[i]=((((y_size//2)*(y_transformed[i]-min(y_transformed)))/(360-min(y_transformed))))
     ploting(x_transformed,y_transformed)
-    
-
-    
-    
 
 def ploting(x,y):
 
