@@ -20,6 +20,13 @@ revolution = motionmeter.MotionMeter(screen,100,(200,500),(20,20,20),separation=
 def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font("assets/BlackHanSans-Regular.ttf", size)
 
+def create_text(texto, coords, color=(255, 255, 255), size=14, font="arial"):
+        font = pygame.font.SysFont(font, size)
+        text = font.render(texto, True, color)
+        textRect = text.get_rect()
+        textRect.center = (coords[0],coords[1])
+        screen.blit(text, textRect)
+
 def main_menu():
     while True:
         screen.fill("#000000") 
@@ -53,6 +60,44 @@ def main_menu():
                     sys.exit()
 
         pygame.display.update()
+
+
+def Fail(explication="The engine fails", points=1000):
+    while True:
+        screen.fill("#000000") 
+
+        MENU_MOUSE_POS = pygame.mouse.get_pos()
+
+        EXPLANATION = get_font(70).render(explication, True, "#fc031c")
+        EXPLANATION_RECT =EXPLANATION.get_rect(center=(640, 100))
+        screen.blit(EXPLANATION, EXPLANATION_RECT)
+        
+        POINTS = get_font(40).render(f"You made: {points} points", True, "#ffffff")
+        POINTS_RECT =POINTS.get_rect(center=(640, 200))
+        screen.blit(POINTS, POINTS_RECT)
+
+
+        PLAY_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 360), text_input="RETURN", font=get_font(60), base_color="white", hovering_color="gray")
+        QUIT_BUTTON = Button(image=pygame.image.load("assets/Quit Rect.png"), pos=(640, 550), text_input="QUIT", font=get_font(60), base_color="white", hovering_color="gray")
+
+        
+        for button in [PLAY_BUTTON, QUIT_BUTTON]:
+            button.changeColor(MENU_MOUSE_POS)
+            button.update(screen)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    main_menu()
+                if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    pygame.quit()
+                    sys.exit()
+
+        pygame.display.update()
+
 
 # cosas dana.
 def random_coeff():
@@ -111,7 +156,10 @@ def drawSpeedlimit(speed):
     speedText = get_font(40).render(str(speed), True, (0, 0, 0))
     screen.blit(speedText, (screen_width-250, 100))
 
+    
+
 def game_loop():
+    flag = False
     # Create an instance of the ImageDisplay class
     image_display = ImageDisplay(screen)
     image_display.show_image()
@@ -144,6 +192,8 @@ def game_loop():
     speed = 30 #speed de la transmision
     mov_x = 0
     mov_y = 0
+
+    point_time=0
     
     while run:
         screen.fill("#000000")
@@ -182,19 +232,19 @@ def game_loop():
         # Car stuff
         angle = abs(math.degrees(theta))
         carRotated = pygame.transform.rotate(car, angle - 90)
-        car_rect = carRotated.get_rect(center=(1280/2, 720/2))
+        car_rect = carRotated.get_rect(center=(640, 340))
         screen.blit(carRotated, car_rect)
 
         # Gear shifting
         if image_display.current_image_index < 6 and clutch == False:
             current_gear = image_display.current_image_index
-            if car_velocity < MIN_SPEEDS[current_gear] or car_velocity > MAX_SPEEDS[current_gear]: print('No se puede cambiar a esta marcha')
+            if car_velocity < MIN_SPEEDS[current_gear] or car_velocity > MAX_SPEEDS[current_gear]: Fail("You are not in the right speed", point_time)
             else:
                 if rpm < 7000: rpm += 40
                 if rpm > 7000: rpm = 7000
                 if rpm == 7000:
                     maxRPMtime += 1
-                    if maxRPMtime >100: print('tiempo maximo alcanzado')
+                    if maxRPMtime >100: Fail("You are not shifting gears", point_time)
                 else: maxRPMtime = 0
                 car_velocity += rpm * rpm_to_velocity_factor * gear_ratios[current_gear] * (1 - car_velocity / MAX_SPEEDS[current_gear])
             time = 0
@@ -266,7 +316,8 @@ def game_loop():
                 if event.key == pygame.K_c:
                     clutch = True
                 if event.key == pygame.K_SPACE and clutch == False:
-                    print('remember to clutch in to break')
+
+                    Fail("You are not using the clutch", point_time)
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_UP or event.key == pygame.K_DOWN:
@@ -281,6 +332,23 @@ def game_loop():
 
             if event.type == pygame.QUIT:
                 run = False
+        
+        if car_velocity == 0 and flag == False:
+            flag=False
+            create_text("Points: 0", (640, 680), size=70,font="assets/BlackHanSans-Regular.ttf")
+            point_time = 0
+        else:
+            if flag == False:
+                times = pygame.time.get_ticks()
+                flag=True
+            if pygame.time.get_ticks() - times > 2000:
+                point_time += int(car_velocity)
+                times = pygame.time.get_ticks()
+            create_text(f"Points: {point_time}", (640, 680), size=70,font="assets/BlackHanSans-Regular.ttf")
+        
+        
+        # time_update +=
+
         velocity.update_Motion(car_velocity)
         revolution.update_Motion(rpm)
         drawSpeedlimit(speed)
@@ -289,5 +357,7 @@ def game_loop():
         image_display.show_image()
         #pygame.display.update()f
         pygame.display.flip()
+   
     pygame.quit()
+
 main_menu()
