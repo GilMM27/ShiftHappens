@@ -4,10 +4,12 @@ import sys
 import math
 from imageDisplay import ImageDisplay
 from button import Button
-
+import motionmeter
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 pygame.display.set_caption('CODICON')
+velocity = motionmeter.MotionMeter(screen,100,(200,200),(20,20,20),separation=13,start_value=0,end_value=260,marks=3,title="KM/H")
+revolution = motionmeter.MotionMeter(screen,100,(200,500),(20,20,20),separation=7,start_value=0,end_value=7000,marks=2,title="RPM",digit=True)
 
 def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font("assets/BlackHanSans-Regular.ttf", size)
@@ -52,7 +54,6 @@ def game_loop():
     # Create an instance of the ImageDisplay class
     image_display = ImageDisplay(screen)
     image_display.show_image()
-
     # Car properties
     car_velocity = 0  # Velocidad inicial del automóvil en km/h
     current_gear = 0  # Marcha actual
@@ -74,7 +75,7 @@ def game_loop():
             current_gear = image_display.current_image_index
             if car_velocity < MIN_SPEEDS[current_gear] or car_velocity > MAX_SPEEDS[current_gear]: print('No se puede cambiar a esta marcha')
             else:
-                if rpm < 7000: rpm += 30
+                if rpm < 7000: rpm += 40
                 if rpm > 7000: rpm = 7000
                 if rpm == 7000:
                     maxRPMtime += 1
@@ -90,7 +91,7 @@ def game_loop():
                 if car_velocity < 0: car_velocity = 0
                 time += 0.001
             if breaking == True:
-                car_velocity -= 0.25
+                car_velocity -= 2
                 if car_velocity < 0: car_velocity = 0
         print('gear ',current_gear+1, 'RPM:', rpm, 'Velocity:', car_velocity)
 
@@ -124,6 +125,8 @@ def game_loop():
 
             if event.type == pygame.QUIT:
                 run = False
+        velocity.update_Motion(car_velocity)
+        revolution.update_Motion(rpm)
         clock.tick(60)
     
         
