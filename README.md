@@ -1,2 +1,2 @@
 # CODICON
-xd
+Run transmission.py to play
